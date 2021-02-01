@@ -3,16 +3,16 @@
 #include <TlHelp32.h>
 #include <iostream>
 
-std::unique_ptr<Process> ProcessService::open(const std::string &name, DWORD access)
+std::shared_ptr<Process> ProcessService::open(const std::string &name, DWORD access)
 {
-    DWORD procId {getProcID(name)};
+    DWORD_PTR procId {getProcID(name)};
 
     if (procId == 0)
     {
         throw std::exception("Error when get process ID");
     }
 
-    uintptr_t moduleBase {getModuleBaseAddress(procId, name)};
+    DWORD_PTR moduleBase {getModuleBaseAddress(procId, name)};
 
     if (moduleBase == 0)
     {
@@ -21,12 +21,12 @@ std::unique_ptr<Process> ProcessService::open(const std::string &name, DWORD acc
 
     HANDLE handle {OpenProcess(access, NULL, procId)};
 
-    return std::make_unique<Process>(handle, moduleBase);
+    return std::make_shared<Process>(handle, moduleBase);
 }
 
-DWORD ProcessService::getProcID(const std::string &name)
+DWORD_PTR ProcessService::getProcID(const std::string &name)
 {
-    DWORD procId {0};
+    DWORD_PTR procId {0};
     HANDLE hSnap {CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)};
 
     if (hSnap != INVALID_HANDLE_VALUE)
@@ -55,15 +55,16 @@ DWORD ProcessService::getProcID(const std::string &name)
     return procId;
 }
 
-uintptr_t ProcessService::getModuleBaseAddress(DWORD pid, const std::string &name)
+DWORD_PTR ProcessService::getModuleBaseAddress(DWORD_PTR pid, const std::string &name)
 {
-    uintptr_t modBaseAddr {0};
+    DWORD_PTR modBaseAddr {0};
     HANDLE hSnap {CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid)};
 
     if (hSnap != INVALID_HANDLE_VALUE)
     {
         MODULEENTRY32 modEntry;
         modEntry.dwSize = sizeof(modEntry);
+
         if (Module32First(hSnap, &modEntry))
         {
             do
@@ -72,7 +73,8 @@ uintptr_t ProcessService::getModuleBaseAddress(DWORD pid, const std::string &nam
 
                 if (name == curModuleName)
                 {
-                    modBaseAddr = (uintptr_t) modEntry.modBaseAddr;
+                    modBaseAddr = reinterpret_cast<DWORD_PTR>(modEntry.modBaseAddr);
+
                     break;
                 }
             } while (Module32Next(hSnap, &modEntry));

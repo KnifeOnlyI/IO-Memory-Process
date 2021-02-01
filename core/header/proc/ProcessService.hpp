@@ -24,7 +24,7 @@ public:
      *
      * \return The process representation
      */
-    static std::unique_ptr<Process> open(const std::string &name, DWORD access);
+    static std::shared_ptr<Process> open(const std::string &name, DWORD access);
 
     /**
      * Check if process with the specified name exists
@@ -44,7 +44,7 @@ private:
      *
      * \return The pid of the specified process
      */
-    static DWORD getProcID(const std::string &name);
+    static DWORD_PTR getProcID(const std::string &name);
 
     /**
      * Get the base address of the specified module
@@ -54,7 +54,7 @@ private:
      *
      * \return The base address of the specified module
      */
-    static uintptr_t getModuleBaseAddress(DWORD pid, const std::string &name);
+    static DWORD_PTR getModuleBaseAddress(DWORD_PTR pid, const std::string &name);
 };
 
 #endif //IOMEMORYPROCESS_PROCESSSERVICE_HPP

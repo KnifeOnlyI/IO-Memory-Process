@@ -19,7 +19,7 @@ public:
      * \param handle The handle
      * \param address The module base address
      */
-    Process(HANDLE handle, uintptr_t address);
+    Process(HANDLE handle, DWORD_PTR address);
 
     /**
      * Get physical address from specified virtual address and offsets
@@ -30,7 +30,7 @@ public:
      * \return The phsysical address from the specified virtual address and offsets
      */
     [[nodiscard]] uintptr_t
-    getAddressFromOffsets(uintptr_t virtualAddress, const std::vector<unsigned int> &offsets) const;
+    getAddressFromOffsets(DWORD_PTR virtualAddress, const std::vector<unsigned int> &offsets) const;
 
     /**
      * Read specified bytes size from the specified address and put in the specified buffer
@@ -39,7 +39,7 @@ public:
      * \param buffer The buffer
      * \param size The size to read
      */
-    void read(uintptr_t address, void *buffer, size_t size) const;
+    void read(DWORD_PTR address, void *buffer, size_t size) const;
 
     /**
      * Write specified bytes size buffer into the specified address
@@ -48,12 +48,12 @@ public:
      * \param buffer The buffer
      * \param size The size to read
      */
-    void write(uintptr_t address, void *buffer, size_t size) const;
+    void write(DWORD_PTR address, void *buffer, size_t size) const;
 
 private:
 
     HANDLE _handle;         /** \var The handle */
-    uintptr_t _address;     /** \var The module base address */
+    DWORD_PTR _address;     /** \var The module base address */
 };
 
 #endif //IOMEMORYPROCESS_PROCESS_HPP

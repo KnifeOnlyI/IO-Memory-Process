@@ -1,30 +1,51 @@
 #include "proc/Process.hpp"
 
+#include <iostream>
+
 Process::Process(HANDLE handle, uintptr_t address)
     : _handle {handle}, _address {address}
 {
 }
 
-uintptr_t Process::getAddressFromOffsets(uintptr_t virtualAddress, const std::vector<unsigned int> &offsets) const
+DWORD_PTR Process::getAddressFromOffsets(DWORD_PTR virtualAddress, const std::vector<unsigned int> &offsets) const
 {
-    uintptr_t addr {_address + virtualAddress};
+    // _address = 0x400000
+    // _virtualAddress = 0x1100F8
+    DWORD_PTR addr {_address + virtualAddress}; // Results = 0x5100f8
+
+    int i {0};
 
     for (unsigned int offset : offsets)
     {
-        ReadProcessMemory(_handle, (BYTE *) addr, &addr, sizeof(addr), nullptr);
+        if (i == 0)
+        {
+            std::cout << "\"ac_client.exe\" + " << std::hex << virtualAddress;
+        }
+        else
+        {
+            std::cout << "[" << std::hex << addr << " + " << offset << "]";
+        }
 
+        // Find which address is pointed by *addr pointer
+        ReadProcessMemory(_handle, (DWORD_PTR *) addr, &addr, sizeof(addr), nullptr);
+
+        std::cout << " -> " << std::hex << addr << '\n';
+
+        // Add offset to address to find the next pointer
         addr += offset;
+
+        i++;
     }
 
     return addr;
 }
 
-void Process::read(uintptr_t address, void *buffer, size_t size) const
+void Process::read(DWORD_PTR address, void *buffer, size_t size) const
 {
-    ReadProcessMemory(_handle, (BYTE *) address, buffer, size, nullptr);
+    ReadProcessMemory(_handle, (DWORD_PTR *) address, buffer, size, nullptr);
 }
 
-void Process::write(uintptr_t address, void *buffer, size_t size) const
+void Process::write(DWORD_PTR address, void *buffer, size_t size) const
 {
-    WriteProcessMemory(_handle, (BYTE *) address, buffer, size, nullptr);
+    WriteProcessMemory(_handle, (DWORD_PTR *) address, buffer, size, nullptr);
 }
