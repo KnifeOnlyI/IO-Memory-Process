@@ -6,15 +6,15 @@
 int main()
 {
     // Open process "re2.exe" with read/write permissions
-    //auto process {ProcessService::open("re2.exe", PROCESS_ALL_ACCESS)};
-    auto process {ProcessService::open("ac_client.exe", PROCESS_ALL_ACCESS)};
+    auto process {ProcessService::open("re2.exe", PROCESS_ALL_ACCESS)};
+    //auto process {ProcessService::open("ac_client.exe", PROCESS_ALL_ACCESS)};
     auto equipedWeapon {new EquipedWeapon(process)};
 
-    //std::cout << "Ammo : " << equipedWeapon->getAmmo() << '\n';
+    std::cout << "Ammo : " << std::dec << equipedWeapon->getAmmo() << '\n';
 
-    //equipedWeapon->setAmmo(250);
+    equipedWeapon->setAmmo(999);
 
-    //std::cout << "Ammo : " << equipedWeapon->getAmmo() << '\n';
+    std::cout << "Ammo : " << equipedWeapon->getAmmo() << '\n';
 
     return 0;
 }

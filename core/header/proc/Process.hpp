@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <vector>
+#include <string>
 
 /**
  * Represent a process
@@ -16,10 +17,11 @@ public:
     /**
      * Create new process representation
      *
+     * \param name The name
      * \param handle The handle
      * \param address The module base address
      */
-    Process(HANDLE handle, DWORD_PTR address);
+    Process(std::string name, HANDLE handle, DWORD_PTR address);
 
     /**
      * Get physical address from specified virtual address and offsets
@@ -52,8 +54,9 @@ public:
 
 private:
 
-    HANDLE _handle;         /** \var The handle */
-    DWORD_PTR _address;     /** \var The module base address */
+    std::string _name;         /** \var The name */
+    HANDLE _handle;            /** \var The handle */
+    DWORD_PTR _address;        /** \var The module base address */
 };
 
 #endif //IOMEMORYPROCESS_PROCESS_HPP

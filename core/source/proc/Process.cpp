@@ -1,41 +1,42 @@
 #include "proc/Process.hpp"
 
 #include <iostream>
+#include <utility>
 
-Process::Process(HANDLE handle, uintptr_t address)
-    : _handle {handle}, _address {address}
+Process::Process(std::string name, HANDLE handle, uintptr_t address)
+    : _name {std::move(name)}, _handle {handle}, _address {address}
 {
 }
 
 DWORD_PTR Process::getAddressFromOffsets(DWORD_PTR virtualAddress, const std::vector<unsigned int> &offsets) const
 {
-    // _address = 0x400000
-    // _virtualAddress = 0x1100F8
-    DWORD_PTR addr {_address + virtualAddress}; // Results = 0x5100f8
+    DWORD_PTR addr {_address + virtualAddress};
 
-    int i {0};
+    std::cout << "\"" << _name << "\"(" << std::hex << _address << ") + " << std::hex << virtualAddress;
 
-    for (unsigned int offset : offsets)
+    ReadProcessMemory(_handle, (DWORD_PTR *) addr, &addr, sizeof(addr), nullptr);
+
+    std::cout << " -> " << std::hex << addr << '\n';
+
+    for (int i {0}; i < offsets.size(); i++)
     {
-        if (i == 0)
+        std::cout << "[" << std::hex << addr << " + " << offsets[i] << "]";
+
+        // Add offset to address to find the next pointer
+        addr += offsets[i];
+
+        if (i != offsets.size() - 1)
         {
-            std::cout << "\"ac_client.exe\" + " << std::hex << virtualAddress;
+            // Find which address is pointed by *addr pointer
+            ReadProcessMemory(_handle, (DWORD_PTR *) addr, &addr, sizeof(addr), nullptr);
+            std::cout << " -> " << std::hex << addr << '\n';
         }
         else
         {
-            std::cout << "[" << std::hex << addr << " + " << offset << "]";
+            std::cout << " = " << std::hex << addr << '\n';
         }
-
-        // Find which address is pointed by *addr pointer
-        ReadProcessMemory(_handle, (DWORD_PTR *) addr, &addr, sizeof(addr), nullptr);
-
-        std::cout << " -> " << std::hex << addr << '\n';
-
-        // Add offset to address to find the next pointer
-        addr += offset;
-
-        i++;
     }
+
 
     return addr;
 }

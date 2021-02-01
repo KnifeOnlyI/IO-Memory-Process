@@ -21,7 +21,7 @@ std::shared_ptr<Process> ProcessService::open(const std::string &name, DWORD acc
 
     HANDLE handle {OpenProcess(access, NULL, procId)};
 
-    return std::make_shared<Process>(handle, moduleBase);
+    return std::make_shared<Process>(name, handle, moduleBase);
 }
 
 DWORD_PTR ProcessService::getProcID(const std::string &name)
